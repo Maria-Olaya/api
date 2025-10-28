@@ -33,7 +33,7 @@
                 <option th:each="t : ${torneos}"
                         th:value="${t.idTorneo}"
                         th:selected="${torneo != null and torneo.idTorneo == t.idTorneo}"
-                        th:text="|${t.nombre} (#{${t.categoria.messageKey}})|">
+                        th:text="|${t.nombre} (#{${t.categoria.mensajeKey}})|">
                 </option>
               </select>
             </div>
@@ -45,7 +45,7 @@
           <div th:if="${torneo != null}">
             <!-- CHG: categoría del torneo traducida en el encabezado -->
             <h4 class="mb-3"
-                th:text="|#{admin.tarifas.asignar.torneoLabel}: ${torneo.nombre} - #{admin.tarifas.asignar.categoriaLabel}: #{${torneo.categoria.messageKey}}|">
+                th:text="|#{admin.tarifas.asignar.torneoLabel}: ${torneo.nombre} - #{admin.tarifas.asignar.categoriaLabel}: #{${torneo.categoria.mensajeKey}}|">
             </h4>
 
             <!-- Tabla de asignación de tarifas -->
