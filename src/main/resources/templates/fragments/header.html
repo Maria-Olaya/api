@@ -1,5 +1,6 @@
-<header>
+<header xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
   <div class="container py-3 d-flex align-items-center justify-content-between">
+
     <!-- Logo -->
     <a href="/">
       <img src="/images/logo-caba-pro.png" alt="CABA Pro" class="logo">
@@ -45,26 +46,24 @@
                   class="nav-link-naranja"
                   style="background:none; border:none; padding:0; cursor:pointer;"></button>
         </form>
-
-        <!-- Selector de idioma (desktop) -->
-        <form method="get" th:action="@{''}" class="ms-3">
-          <select name="lang"
-                  onchange="this.form.submit()"
-                  class="form-select form-select-sm"
-                  style="width:auto; display:inline-block;">
-            <option value="es" th:selected="${#locale.language == 'es'}">ES</option>
-            <option value="en" th:selected="${#locale.language == 'en'}">EN</option>
-          </select>
-
-          <!-- Preserva parámetros que sí necesitas (ej. partidoId) -->
-          <input type="hidden" name="partidoId"
-                 th:if="${param.partidoId != null}"
-                 th:value="${param.partidoId}"/>
-          <!-- Añade aquí otros que necesites conservar en otras pantallas -->
-          <!-- <input type="hidden" name="id" th:if="${param.id}" th:value="${param.id}"/> -->
-        </form>
       </div>
     </nav>
+
+    <!-- Selector de idioma (DESKTOP) SIEMPRE visible -->
+    <form method="get" th:action="@{''}" class="d-none d-md-block ms-3">
+      <select name="lang"
+              onchange="this.form.submit()"
+              class="form-select form-select-sm"
+              style="width:auto; display:inline-block;">
+        <option value="es" th:selected="${#locale.language == 'es'}">ES</option>
+        <option value="en" th:selected="${#locale.language == 'en'}">EN</option>
+      </select>
+
+      <!-- Ejemplo de preservación de parámetros si aplica -->
+      <input type="hidden" name="partidoId"
+             th:if="${param.partidoId != null}"
+             th:value="${param.partidoId}"/>
+    </form>
 
     <!-- Botón menú móvil -->
     <div class="d-md-none">
@@ -100,31 +99,24 @@
           <button type="submit" th:text="#{header.cerrarSesion}" class="nav-link-naranja d-block"
                   style="background:none; border:none; padding:0; cursor:pointer;"></button>
         </form>
-
-        <!-- Selector de idioma (móvil) -->
-        <form method="get" th:action="@{''}">
-          <select name="lang" onchange="this.form.submit()" class="form-select form-select-sm" style="width:auto;">
-            <option value="es" th:selected="${#locale.language == 'es'}">ES</option>
-            <option value="en" th:selected="${#locale.language == 'en'}">EN</option>
-          </select>
-          <input type="hidden" name="partidoId"
-                 th:if="${param.partidoId != null}"
-                 th:value="${param.partidoId}"/>
-        </form>
       </div>
 
       <!-- NO autenticado (móvil) -->
       <div sec:authorize="isAnonymous()" class="mt-2">
         <a href="/login" th:text="#{header.iniciarSesion}" class="nav-link-naranja d-block mb-2"></a>
-
-        <!-- Selector idioma también disponible en anónimo -->
-        <form method="get" th:action="@{''}">
-          <select name="lang" onchange="this.form.submit()" class="form-select form-select-sm" style="width:auto;">
-            <option value="es" th:selected="${#locale.language == 'es'}">ES</option>
-            <option value="en" th:selected="${#locale.language == 'en'}">EN</option>
-          </select>
-        </form>
       </div>
+
+      <!-- Selector de idioma (MÓVIL) SIEMPRE visible -->
+      <form method="get" th:action="@{''}">
+        <select name="lang" onchange="this.form.submit()" class="form-select form-select-sm" style="width:auto;">
+          <option value="es" th:selected="${#locale.language == 'es'}">ES</option>
+          <option value="en" th:selected="${#locale.language == 'en'}">EN</option>
+        </select>
+        <input type="hidden" name="partidoId"
+               th:if="${param.partidoId != null}"
+               th:value="${param.partidoId}"/>
+      </form>
+
     </div>
   </div>
 </header>

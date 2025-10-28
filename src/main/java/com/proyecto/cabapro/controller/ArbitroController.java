@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
@@ -39,6 +40,8 @@ public class ArbitroController {
     @PostMapping
     public String actualizarPerfil(@AuthenticationPrincipal(expression = "username") String correo,
                                    @ModelAttribute("arbitro") Arbitro form,
+                                   @RequestParam(value = "foto", required = false) MultipartFile foto,
+                                   @RequestParam(value = "quitarFoto", required = false) Boolean quitarFoto,
                                    BindingResult binding,
                                    Model model,
                                    RedirectAttributes ra) {
@@ -50,14 +53,22 @@ public class ArbitroController {
         }
 
         try {
+            // Mantengo compatibilidad: si no envían archivo y no quieren quitar,
+            // se conserva la URL que venía en el hidden urlFoto
             arbitroService.actualizarPerfil(
-                correo,
-                form.getUrlFoto(),
-                form.getFechasDisponibles()
+                    correo,
+                    form.getUrlFoto(),
+                    form.getFechasDisponibles(),
+                    foto,
+                    Boolean.TRUE.equals(quitarFoto)
             );
             ra.addFlashAttribute("msgCode", "perfil.actualizado");
             return "redirect:/arbitro/dashboard";
         } catch (IllegalArgumentException ex) {
+            ra.addFlashAttribute("errCode", "perfil.error");
+            ra.addFlashAttribute("errArg0", ex.getMessage());
+            return "redirect:/arbitro/perfil";
+        } catch (Exception ex) {
             ra.addFlashAttribute("errCode", "perfil.error");
             ra.addFlashAttribute("errArg0", ex.getMessage());
             return "redirect:/arbitro/perfil";
