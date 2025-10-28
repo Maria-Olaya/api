@@ -1,4 +1,6 @@
-package com.proyecto.cabapro.controller;
+ // MODIFICADO 
+
+ package com.proyecto.cabapro.controller;
 
 import com.proyecto.cabapro.dto.TarifaCalculoRow;
 import com.proyecto.cabapro.enums.Escalafon;
@@ -12,6 +14,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.beans.factory.annotation.Autowired; 
+import org.springframework.context.MessageSource;   
+import java.util.Locale;                               
+
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -23,16 +29,24 @@ public class TarifaAdminController {
     private final PartidoService partidoService;
     private final TarifaService tarifaService;
 
+    // 🔹 [NUEVO] Se agrega el MessageSource para poder leer los mensajes desde messages.properties
+    private final MessageSource messageSource;
+
+    // 🔹 [MODIFICADO] Constructor actualizado para incluir MessageSource
+    @Autowired
     public TarifaAdminController(TorneoService torneoService,
                                  PartidoService partidoService,
-                                 TarifaService tarifaService) {
+                                 TarifaService tarifaService,
+                                 MessageSource messageSource) {
         this.torneoService = torneoService;
         this.partidoService = partidoService;
         this.tarifaService = tarifaService;
+        this.messageSource = messageSource; // <-- [NUEVO]
     }
 
     @GetMapping("/asignar")
-    public String asignar(@RequestParam(required = false) Integer torneoId, Model model) {
+    // 🔹 [MODIFICADO] Se agregó Locale como parámetro para detectar el idioma actual
+    public String asignar(@RequestParam(required = false) Integer torneoId, Model model, Locale locale) {
         model.addAttribute("torneos", torneoService.listarTorneos());
 
         if (torneoId == null) {
@@ -41,14 +55,14 @@ public class TarifaAdminController {
 
         Torneo torneo = torneoService.obtenerPorId(torneoId);
         if (torneo == null) {
-            model.addAttribute("err", "Torneo no encontrado.");
+            // 🔹 [CAMBIO PRINCIPAL] Texto fijo eliminado y reemplazado por el mensaje del archivo messages.properties
+            String errorMsg = messageSource.getMessage("error.torneoNoEncontrado", null, locale);
+            model.addAttribute("err", errorMsg);
             return "admin/tarifas/asignar";
         }
 
-       
         tarifaService.generarAutomaticoParaTorneo(torneoId);
 
-        
         List<Partido> partidos = partidoService.getPartidosByTorneo(torneo.getIdTorneo());
 
         List<TarifaCalculoRow> filas = new ArrayList<>();

@@ -1,3 +1,5 @@
+// MODIFICADO 
+
 package com.proyecto.cabapro.service;
 
 import com.proyecto.cabapro.enums.EstadoAsignacion;
@@ -23,6 +25,7 @@ public class ArbitroService {
     public static class DuplicateEmailException extends RuntimeException {
         public DuplicateEmailException(String message) { super(message); }
     }
+
     public static class PasswordRequiredOnCreateException extends RuntimeException {
         public PasswordRequiredOnCreateException(String message) { super(message); }
     }
@@ -33,11 +36,10 @@ public class ArbitroService {
 
     public ArbitroService(ArbitroRepository arbitroRepo, AsignacionRepository asignacionRepo) {
         this.arbitroRepo = arbitroRepo;
-        this.asignacionRepo= asignacionRepo;
+        this.asignacionRepo = asignacionRepo;
     }
 
-    // =============== (DESDE ADMIN) ===============
-
+    // =============== ADMIN ===============
     public List<Arbitro> listar() {
         return arbitroRepo.findAll();
     }
@@ -47,18 +49,16 @@ public class ArbitroService {
     }
 
     public Arbitro crear(Arbitro a) {
-        // Reglas de negocio
         if (a.getCorreo() == null || a.getCorreo().isBlank()) {
-            throw new IllegalArgumentException("El correo es obligatorio");
+            throw new IllegalArgumentException("admin.arbitros.error.correoRequerido");
         }
         if (arbitroRepo.existsByCorreoIgnoreCase(a.getCorreo())) {
-            throw new DuplicateEmailException("El correo ya está en uso por otro usuario");
+            throw new DuplicateEmailException("admin.arbitros.error.correoDuplicado");
         }
         if (a.getContrasena() == null || a.getContrasena().isBlank()) {
-            throw new PasswordRequiredOnCreateException("La contraseña es obligatoria al crear el árbitro");
+            throw new PasswordRequiredOnCreateException("admin.arbitros.error.contrasenaRequerida");
         }
 
-       
         a.setContrasena(encoder.encode(a.getContrasena()));
         if (a.getRol() == null || a.getRol().isBlank()) {
             a.setRol("ROLE_ARBITRO");
@@ -70,22 +70,19 @@ public class ArbitroService {
         Arbitro actual = buscar(id);
         if (actual == null) return null;
 
-        
         if (datos.getCorreo() == null || datos.getCorreo().isBlank()) {
-            throw new IllegalArgumentException("El correo es obligatorio");
+            throw new IllegalArgumentException("admin.arbitros.error.correoRequerido");
         }
         if (!datos.getCorreo().equalsIgnoreCase(actual.getCorreo())) {
             if (arbitroRepo.existsByCorreoIgnoreCaseAndIdNot(datos.getCorreo(), id)) {
-                throw new DuplicateEmailException("El correo ya está en uso por otro usuario");
+                throw new DuplicateEmailException("admin.arbitros.error.correoDuplicado");
             }
         }
 
-        
         actual.setNombre(datos.getNombre());
         actual.setApellido(datos.getApellido());
         actual.setCorreo(datos.getCorreo());
 
-        // Rol: mantener si no envían, y nunca dejar vacío
         if (datos.getRol() != null && !datos.getRol().isBlank()) {
             actual.setRol(datos.getRol());
         }
@@ -93,13 +90,11 @@ public class ArbitroService {
             actual.setRol("ROLE_ARBITRO");
         }
 
-        // Contraseña solo si llega no vacía
         if (datos.getContrasena() != null && !datos.getContrasena().isBlank()) {
             actual.setContrasena(encoder.encode(datos.getContrasena()));
         }
 
-       
-        actual.setUrlFoto(datos.getUrlFoto());
+        // Eliminado: actual.setUrlFoto(datos.getUrlFoto());
         actual.setEspecialidad(datos.getEspecialidad());
         actual.setEscalafon(datos.getEscalafon());
 
@@ -118,11 +113,10 @@ public class ArbitroService {
         }
     }
 
-     // =============== PERFIL (ÁRBITRO) ===============
-
+    // =============== PERFIL (ÁRBITRO) ===============
     public Arbitro getActual(String correo) {
         return arbitroRepo.findByCorreo(correo)
-                .orElseThrow(() -> new IllegalArgumentException("Árbitro no encontrado para correo: " + correo));
+                .orElseThrow(() -> new IllegalArgumentException("admin.arbitros.error.noEncontradoCorreo"));
     }
 
     public void actualizarPerfil(String correo, String urlFoto, Set<LocalDate> nuevasFechas) {
@@ -139,8 +133,6 @@ public class ArbitroService {
         arbitroRepo.save(a);
     }
 
-    // =============== FECHAS BLOQUEADAS ===============
-
     @Transactional(readOnly = true)
     public Set<LocalDate> fechasBloqueadas(Arbitro a) {
         return asignacionRepo.findByArbitroAndEstado(a, EstadoAsignacion.ACEPTADA)
@@ -148,5 +140,4 @@ public class ArbitroService {
                 .map(Asignacion::getFechaAsignacion)
                 .collect(Collectors.toSet());
     }
-
 }
