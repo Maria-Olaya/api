@@ -1,4 +1,4 @@
-package com.proyecto.cabapro.controller;
+package com.proyecto.cabapro.rest;
 
 import java.util.List;
 
