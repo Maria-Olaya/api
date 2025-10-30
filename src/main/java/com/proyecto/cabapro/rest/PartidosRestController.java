@@ -17,13 +17,13 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/partidos")
-public class PartidoRestController {
+@RequestMapping("/api/partido")
+public class PartidosRestController {
 
     private final PartidoService partidoService;
     private final TorneoService torneoService;
 
-    public PartidoRestController(PartidoService partidoService, TorneoService torneoService) {
+    public PartidosRestController(PartidoService partidoService, TorneoService torneoService) {
         this.partidoService = partidoService;
         this.torneoService = torneoService;
     }

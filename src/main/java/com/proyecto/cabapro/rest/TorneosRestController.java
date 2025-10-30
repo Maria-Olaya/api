@@ -22,8 +22,8 @@ import com.proyecto.cabapro.service.TorneoService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/torneos")
-public class TorneoRestController {
+@RequestMapping("/api/torneo")
+public class TorneosRestController {
 
     @Autowired
     private MessageSource messageSource;
@@ -31,7 +31,7 @@ public class TorneoRestController {
     private final TorneoService torneoService;
     private final PartidoService partidoService;
 
-    public TorneoRestController(TorneoService torneoService, PartidoService partidoService) {
+    public TorneosRestController(TorneoService torneoService, PartidoService partidoService) {
         this.torneoService = torneoService;
         this.partidoService = partidoService;
     }
