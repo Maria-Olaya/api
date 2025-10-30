@@ -9,6 +9,7 @@
     <!-- Navegación (desktop) -->
     <nav class="d-none d-md-flex align-items-center gap-3">
       <a href="/" th:text="#{header.inicio}" class="nav-link-text"></a>
+      <a href="/noticias" th:text="#{news.titulo}" class="nav-link-text"></a>
 
       <!-- NO autenticado -->
       <div sec:authorize="isAnonymous()">
