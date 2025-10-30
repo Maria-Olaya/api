@@ -27,4 +27,3 @@ public class TarifaCalculoRow {
     public BigDecimal getAdicional() { return adicional; }
     public BigDecimal getTotal() { return total; }
 }
-

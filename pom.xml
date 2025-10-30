@@ -145,7 +145,11 @@
 		</dependency>
 
 
-
+       <!-- Soporte de Jackson para Hibernate (resuelve ByteBuddyInterceptor) -->
+       <dependency>
+           <groupId>com.fasterxml.jackson.datatype</groupId>
+           <artifactId>jackson-datatype-hibernate6</artifactId>
+       </dependency>
 
 
 	</dependencies>

@@ -1,5 +1,8 @@
+// NUEVO - si
 package com.proyecto.cabapro.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.proyecto.cabapro.enums.Escalafon;
 import com.proyecto.cabapro.enums.Especialidad;
 import jakarta.persistence.*;
@@ -11,6 +14,7 @@ import java.util.*;
 
 @Entity
 @Table(name = "arbitros")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Arbitro extends Usuario {
 
     private String urlFoto;
@@ -37,15 +41,19 @@ public class Arbitro extends Usuario {
 
     // ---- Relaciones  ----
     @OneToMany(mappedBy = "arbitro", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonManagedReference // 🔹 Evita recursión con Asignacion
     private List<Asignacion> asignaciones = new ArrayList<>();
 
     @OneToMany(mappedBy = "arbitro", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonManagedReference // 🔹 Evita recursión con Tarifa
     private List<Tarifa> tarifas = new ArrayList<>();
 
     @OneToMany(mappedBy = "arbitro", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonManagedReference // 🔹 Evita recursión con Liquidacion
     private List<Liquidacion> liquidaciones = new ArrayList<>();
 
     @ManyToMany(mappedBy = "arbitros", fetch = FetchType.LAZY)
+    @JsonIgnoreProperties("arbitros") // 🔹 Evita recursión con Partido
     private List<Partido> partidos = new ArrayList<>();
 
     public Arbitro() {}
