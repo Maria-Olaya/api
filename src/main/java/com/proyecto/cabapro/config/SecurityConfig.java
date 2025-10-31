@@ -1,14 +1,26 @@
 package com.proyecto.cabapro.config;
 
+import com.proyecto.cabapro.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
+
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -16,57 +28,44 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login", "/registro", "/css/**", "/js/**","/images/**","/uploads/**").permitAll()
-                .requestMatchers("/admin/**","/torneos/**","/partidos/**").hasRole("ADMIN")
-                .requestMatchers("/arbitro/**").hasRole("ARBITRO")
-                .anyRequest().authenticated()
-            )
-            .formLogin(form -> form
-                .loginPage("/login")
-                .successHandler((request, response, authentication) -> {
-                    // Tomamos el rol del usuario autenticado
-                    String role = authentication.getAuthorities().iterator().next().getAuthority();
-                    if (role.equals("ROLE_ADMIN")) {
-                        response.sendRedirect("/admin/dashboard");
-                    } else if (role.equals("ROLE_ARBITRO")) {
-                        response.sendRedirect("/arbitro/dashboard");
-                    } else {
-                        response.sendRedirect("/"); // fallback
-                    }
-                })
-                .permitAll()
-            )
+                // Swagger totalmente público
+                .requestMatchers(
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/api-docs/**",   // 👈 Cambiado aquí
+                    "/api-docs/swagger-config", // 👈 Cambiado aquí
+                    "/swagger-resources/**",
+                    "/webjars/**",
+                    "/", "/error", "/favicon.ico"
+                ).permitAll()
 
-            .logout(logout -> logout
-                .logoutSuccessUrl("/")
-                .permitAll()
+                // Endpoints públicos de autenticación
+                .requestMatchers("/api/auth/**").permitAll()
+
+                // Rutas protegidas
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/arbitro/**").hasRole("ARBITRO")
+                .requestMatchers("/api/**").authenticated()
+
+                // Cualquier otro request (no listado) se bloquea
+                .anyRequest().denyAll()
+            )
+            // Filtro JWT
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+            // Manejo de errores en JSON
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((req, res, excep) -> {
+                    res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    res.setContentType("application/json");
+                    res.getWriter().write("{\"error\": \"Unauthorized or invalid token\"}");
+                })
             );
 
         return http.build();
     }
 }
-
-
-/*[Petición HTTP]
-       |
-       v
-[SecurityFilterChain]
-       |
-       +--> CSRF? disabled -> sigue
-       |
-       +--> URL autorizada? 
-       |      |-- /, /login, /registro, /css/** -> pasa
-       |      |-- /admin/** -> check ROLE_ADMIN
-       |      |-- /arbitro/** -> check ROLE_ARBITRO
-       |      |-- cualquier otra -> check autenticado
-       |
-       +--> Login Form?
-       |      |-- credenciales correctas -> successHandler -> redirige según rol
-       |
-       +--> Logout?
-              |-- invalida sesión -> redirige a /
-*/
