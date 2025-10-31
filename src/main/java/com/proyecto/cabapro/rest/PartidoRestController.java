@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/torneos/{torneoId}/partidos")
+@RequestMapping("/api/admin/torneos/{torneoId}/partidos")
 @Tag(name = "Partidos", description = "Operaciones sobre partidos de un torneo")
 public class PartidoRestController {
 

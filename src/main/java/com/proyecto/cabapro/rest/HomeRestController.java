@@ -4,6 +4,7 @@ package com.proyecto.cabapro.rest;
 import java.security.Principal;
 import java.util.Optional;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,8 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.proyecto.cabapro.model.Arbitro;
 import com.proyecto.cabapro.model.Usuario;
 import com.proyecto.cabapro.repository.UsuarioRepository;
-
-import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api")
@@ -31,14 +30,14 @@ public class HomeRestController {
     }
 
     // Dashboard de admin
-    @GetMapping("/admin/dashboard")
+    @GetMapping("/admin/dashboard")//bien
     public ResponseEntity<String> adminDashboard() {
         // En una API REST no se redirige, solo se devuelve un mensaje o datos
         return ResponseEntity.ok("Dashboard del administrador - usa /api/admin/arbitros para gestionar árbitros");
     }
 
     // Dashboard de árbitro
-    @GetMapping("/arbitro/dashboard")
+    @GetMapping("/arbitro/dashboard")//bien
     public ResponseEntity<?> arbitroDashboard(Principal principal) {
         if (principal != null) {
             String correo = principal.getName();

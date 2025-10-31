@@ -27,7 +27,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/api/torneos")
+@RequestMapping("/api/admin/torneos")
 @CrossOrigin(origins = "*")
 @Tag(
     name = "Gestión de Torneos",

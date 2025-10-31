@@ -1,16 +1,21 @@
 // NUEVO - si
 package com.proyecto.cabapro.rest;
 
-import com.proyecto.cabapro.model.Asignacion;
-import com.proyecto.cabapro.model.Partido;
-import com.proyecto.cabapro.service.AsignacionService;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.proyecto.cabapro.model.Asignacion;
+import com.proyecto.cabapro.model.Partido;
+import com.proyecto.cabapro.service.AsignacionService;
+
 @RestController
-@RequestMapping("/api/admin/asignaciones")
+@RequestMapping("/api/admin/asignaciones")//bien
 public class AsignacionAdminRestController {
 
     private final AsignacionService asignacionService;
@@ -42,7 +47,7 @@ public class AsignacionAdminRestController {
     /**
      * Crea una nueva asignación para un partido dado.
      */
-    @PostMapping("/uno")
+    @PostMapping("/uno")//???
     public Map<String, Object> crearAsignacion(
             @RequestParam("partidoId") int partidoId,
             @RequestParam("arbitroId") Integer arbitroId

@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
-@RestController
+@RestController("/api")
 public class NewsController {
 
     private final NewsDataService newsDataService;
@@ -34,7 +34,7 @@ public class NewsController {
             )
         }
     )
-    @GetMapping("/nba-news")
+    @GetMapping("/news")
     public List<NewsArticle> fetchNBAnews() {
         return newsDataService.getBasketballNews();
     }

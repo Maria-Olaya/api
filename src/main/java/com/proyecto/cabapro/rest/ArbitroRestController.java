@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/arbitro")
+@RequestMapping("/api/arbitro")//bien
 public class ArbitroRestController {
 
     private final ArbitroService arbitroService;
