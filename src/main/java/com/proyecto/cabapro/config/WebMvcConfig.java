@@ -1,12 +1,13 @@
 package com.proyecto.cabapro.config;
 
+import java.nio.file.Paths;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.resource.PathResourceResolver;
-
-import java.nio.file.Paths;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -22,4 +23,14 @@ public class WebMvcConfig implements WebMvcConfigurer {
             .resourceChain(true)
             .addResolver(new PathResourceResolver());
   }
+  @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+          .allowedOriginPatterns("*")  // cualquier origen
+          .allowedMethods("*")         // cualquier método
+          .allowedHeaders("*")
+          .allowCredentials(true)
+          .maxAge(3600);
+
+    }
 }
