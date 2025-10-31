@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.proyecto.cabapro.security.ApiKeyAuthFilter;
 import com.proyecto.cabapro.security.JwtAuthenticationFilter;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,9 +20,11 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final ApiKeyAuthFilter apiKeyAuthFilter;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, ApiKeyAuthFilter apiKeyAuthFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.apiKeyAuthFilter = apiKeyAuthFilter;
     }
 
     @Bean
@@ -57,6 +60,10 @@ public class SecurityConfig {
                 // Cualquier otro request (no listado) se bloquea
                 .anyRequest().denyAll()
             )
+
+
+            // 🔹 Orden importante: primero la API Key, luego el JWT
+            .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class)
             // Filtro JWT
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             // Manejo de errores en JSON
@@ -64,7 +71,7 @@ public class SecurityConfig {
                 .authenticationEntryPoint((req, res, excep) -> {
                     res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     res.setContentType("application/json");
-                    res.getWriter().write("{\"error\": \"Unauthorized or invalid token\"}");
+                    res.getWriter().write("{\"error\": \"Unauthorized or invalid credentials\"}");
                 })
             );
 
