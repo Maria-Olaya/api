@@ -3,6 +3,7 @@ package com.proyecto.cabapro.rest;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.proyecto.cabapro.model.NewsArticle;
@@ -13,8 +14,8 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-
-@RestController("/api")
+@RestController
+@RequestMapping("/api")
 public class NewsController {
 
     private final NewsDataService newsDataService;
