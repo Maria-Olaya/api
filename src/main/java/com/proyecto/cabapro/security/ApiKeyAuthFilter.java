@@ -26,6 +26,16 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
                                     throws ServletException, IOException {
+        // 🔹 Define path desde el request
+        String path = request.getRequestURI();
+
+        // Ignorar Swagger
+         if (path.startsWith("/swagger-ui") || path.startsWith("/v3/api-docs") ||
+            path.startsWith("/api-docs") || path.startsWith("/swagger-resources") ||
+            path.startsWith("/webjars")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String apiKey = request.getHeader("X-API-KEY");
 
@@ -33,6 +43,7 @@ public class ApiKeyAuthFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } else if (request.getRequestURI().startsWith("/api/public")) {
             // Permite rutas públicas sin API key
+        
             filterChain.doFilter(request, response);
         } else {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);

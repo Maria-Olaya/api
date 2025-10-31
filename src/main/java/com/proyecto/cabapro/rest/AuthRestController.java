@@ -69,7 +69,7 @@ public class AuthRestController {
         nuevo.setApellido(form.getApellido());
         nuevo.setCorreo(form.getCorreo());
         nuevo.setContrasena(passwordEncoder.encode(form.getContrasena()));
-        nuevo.setRol("USER"); // Rol por defecto
+        nuevo.setRol("ADMIN"); // Rol por defecto
 
         usuarioRepository.save(nuevo);
 
