@@ -14,6 +14,10 @@ import com.proyecto.cabapro.model.Usuario;
 import com.proyecto.cabapro.repository.UsuarioRepository;
 import com.proyecto.cabapro.security.JwtTokenProvider;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -28,6 +32,43 @@ public class AuthRestController {
     private JwtTokenProvider jwtTokenProvider;
 
     // --- LOGIN ---
+    // ================= LOGIN =================
+    // ================= LOGIN =================
+    @Operation(
+        summary = "Login de usuario",
+        description = "Permite a un usuario autenticarse y obtener un token JWT.",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Credenciales de login",
+            required = true,
+            content = @Content(
+                schema = @Schema(
+                    example = "{ \"correo\": \"admin@liga.com\", \"contrasena\": \"123456\" }"
+                )
+            )
+        ),
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Login exitoso",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{ \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\", "
+                                + "\"correo\": \"admin@liga.com\", "
+                                + "\"rol\": \"ADMIN\" }"
+                    )
+                )
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Error de credenciales",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{ \"error\": \"Usuario no encontrado\" }"
+                    )
+                )
+            )
+        }
+    )
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody Map<String, String> request) {
         String correo = request.get("correo");
@@ -50,6 +91,53 @@ public class AuthRestController {
     }
 
     // --- REGISTRO ---
+    // ================= REGISTRO =================
+    @Operation(
+        summary = "Registro de usuario",
+        description = "Permite registrar un nuevo usuario en el sistema."
+                    + "Campos requeridos según RegisterForm:\n"
+                    + "- nombre: mínimo 2, máximo 50 caracteres, solo letras y espacios.\n"
+                    + "- apellido: mínimo 2, máximo 50 caracteres, solo letras y espacios.\n"
+                    + "- correo: formato de correo válido.\n"
+                    + "- contrasena: mínimo 6 caracteres.\n"
+                    + "- confirmContrasena: debe coincidir con contrasena.",
+        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Datos de registro",
+            required = true,
+            content = @Content(
+                schema = @Schema(
+                    example = "{ \"nombre\": \"Juan\", "
+                            + "\"apellido\": \"Perez\", "
+                            + "\"correo\": \"juan.perez@liga.com\", "
+                            + "\"contrasena\": \"123456\", "
+                            + "\"confirmContrasena\": \"123456\" }"
+                )
+            )
+        ),
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Usuario registrado correctamente",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{ \"mensaje\": \"Usuario registrado correctamente\", "
+                                + "\"correo\": \"juan.perez@liga.com\", "
+                                + "\"rol\": \"ADMIN\", "
+                                + "\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\" }"
+                    )
+                )
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Error de validación",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{ \"error\": \"Las contraseñas no coinciden\" }"
+                    )
+                )
+            )
+        }
+    )
     @PostMapping("/register")
     public Map<String, Object> register(@RequestBody @Valid RegisterForm form) {
 

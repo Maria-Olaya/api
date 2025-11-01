@@ -14,6 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.proyecto.cabapro.service.AsignacionService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 @RestController
 @RequestMapping("/api/arbitro/asignaciones")//bien
 public class AsignacionArbitroRestController {
@@ -27,6 +32,28 @@ public class AsignacionArbitroRestController {
     /**
      * Obtiene las asignaciones del árbitro actual autenticado.
      */
+    // ================= LISTAR ASIGNACIONES DEL ÁRBITRO =================
+    @Operation(
+        summary = "Listar asignaciones del árbitro autenticado",
+        description = "Devuelve el árbitro actual y sus asignaciones con el estado.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Asignaciones obtenidas correctamente",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{ " +
+                                  "\"arbitro\": { \"id\": 10, \"nombre\": \"Carlos\", \"especialidad\": \"PRINCIPAL\" }, " +
+                                  "\"asignaciones\": [ " +
+                                  "{ \"id\": 5, \"partidoId\": 1, \"estado\": \"PENDIENTE\" }, " +
+                                  "{ \"id\": 6, \"partidoId\": 2, \"estado\": \"ACEPTADA\" } " +
+                                  "]" +
+                                  "}"
+                    )
+                )
+            )
+        }
+    )
     @GetMapping
     public Map<String, Object> listarAsignaciones(@AuthenticationPrincipal User principal) {
         String correo = principal.getUsername();
@@ -39,6 +66,31 @@ public class AsignacionArbitroRestController {
     /**
      * Acepta una asignación del árbitro autenticado.
      */
+    // ================= ACEPTAR ASIGNACIÓN =================
+    @Operation(
+        summary = "Aceptar asignación",
+        description = "El árbitro acepta una asignación específica.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Asignación aceptada correctamente",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{ \"status\": \"success\", \"message\": \"Asignación aceptada correctamente.\" }"
+                    )
+                )
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Error al aceptar la asignación",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{ \"status\": \"error\", \"message\": \"Asignación ya fue aceptada previamente\" }"
+                    )
+                )
+            )
+        }
+    )
     @PostMapping("/{id}/aceptar")
     public Map<String, String> aceptarAsignacion(@AuthenticationPrincipal User principal,
                                                  @PathVariable Long id) {
@@ -57,6 +109,31 @@ public class AsignacionArbitroRestController {
     /**
      * Rechaza una asignación del árbitro autenticado.
      */
+     // ================= RECHAZAR ASIGNACIÓN =================
+    @Operation(
+        summary = "Rechazar asignación",
+        description = "El árbitro rechaza una asignación específica.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Asignación rechazada correctamente",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{ \"status\": \"success\", \"message\": \"Asignación rechazada correctamente.\" }"
+                    )
+                )
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Error al rechazar la asignación",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{ \"status\": \"error\", \"message\": \"Asignación ya fue rechazada previamente\" }"
+                    )
+                )
+            )
+        }
+    )
     @PostMapping("/{id}/rechazar")
     public Map<String, String> rechazarAsignacion(@AuthenticationPrincipal User principal,
                                                   @PathVariable Long id) {

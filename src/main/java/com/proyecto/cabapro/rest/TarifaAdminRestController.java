@@ -1,6 +1,21 @@
 // NUEVO - si 
 package com.proyecto.cabapro.rest;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.proyecto.cabapro.dto.TarifaCalculoRow;
 import com.proyecto.cabapro.enums.Escalafon;
 import com.proyecto.cabapro.model.Arbitro;
@@ -9,14 +24,11 @@ import com.proyecto.cabapro.model.Torneo;
 import com.proyecto.cabapro.service.PartidoService;
 import com.proyecto.cabapro.service.TarifaService;
 import com.proyecto.cabapro.service.TorneoService;
-import org.springframework.web.bind.annotation.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import java.util.Locale;
-
-import java.math.BigDecimal;
-import java.util.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 @RestController
 @RequestMapping("/api/admin/tarifas")
@@ -40,6 +52,41 @@ public class TarifaAdminRestController {
     }
 
     // ✅ Reemplaza al método "asignar" original, pero ahora devuelve JSON
+     // ================= ASIGNAR TARIFAS =================
+    @Operation(
+        summary = "Generar y listar tarifas de árbitros",
+        description = "Devuelve las tarifas calculadas para los árbitros de un torneo específico.\n"
+                    + "Si no se pasa torneoId, devuelve solo los torneos disponibles.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Tarifas generadas correctamente",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{"
+                                + "\"torneos\": [{ \"idTorneo\": 1, \"nombre\": \"Torneo A\" }], "
+                                + "\"torneo\": { \"idTorneo\": 1, \"nombre\": \"Torneo A\", \"categoria\": \"UNIVERSITARIO\" }, "
+                                + "\"filas\": ["
+                                + "{ \"partido\": { \"id\": 101 }, \"arbitro\": { \"id\": 10, \"nombre\": \"Juan\" }, \"base\": 100000, \"adicional\": 20000, \"total\": 120000 }"
+                                + "], "
+                                + "\"resumen\": ["
+                                + "{ \"arbitro\": { \"id\": 10, \"nombre\": \"Juan\" }, \"total\": 120000 }"
+                                + "]"
+                                + "}"
+                    )
+                )
+            ),
+            @ApiResponse(
+                responseCode = "400",
+                description = "Error por torneoId inexistente o no especificado",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{ \"message\": \"Debe especificar un torneoId para generar tarifas.\" }"
+                    )
+                )
+            )
+        }
+    )
     @GetMapping("/asignar")
     public Object asignar(@RequestParam(required = false) Integer torneoId, Locale locale) {
 

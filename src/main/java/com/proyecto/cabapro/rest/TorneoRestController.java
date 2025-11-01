@@ -24,7 +24,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -45,11 +44,22 @@ public class TorneoRestController {
     }
 
     // ✅ Listar todos los torneos
-    @Operation(summary = "Listar todos los torneos", description = "Devuelve una lista con todos los torneos registrados en el sistema.")
-    @ApiResponse(
-        responseCode = "200",
-        description = "Lista de torneos obtenida exitosamente.",
-        content = @Content(mediaType = "application/json", schema = @Schema(implementation = Torneo.class))
+    // ================= LISTAR TORNEOS =================
+    @Operation(
+        summary = "Listar todos los torneos",
+        description = "Devuelve una lista con todos los torneos registrados en el sistema.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Lista de torneos obtenida exitosamente",
+                content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(
+                        example = "[{ \"id\": 1, \"nombre\": \"Copa Primavera\", \"tipoTorneo\": \"LIGA\", \"categoria\": \"UNIVERSITARIO\", \"fechaInicio\": \"2025-11-01\", \"fechaFin\": \"2025-11-30\" }]"
+                    )
+                )
+            )
+        }
     )
     @GetMapping
     public List<Torneo> listarTorneos() {
@@ -57,11 +67,23 @@ public class TorneoRestController {
     }
 
     // ✅ Obtener un torneo por ID
-    @Operation(summary = "Obtener un torneo por su ID", description = "Devuelve la información completa de un torneo dado su ID.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Torneo encontrado."),
-        @ApiResponse(responseCode = "404", description = "Torneo no encontrado.")
-    })
+    // ================= OBTENER TORNEO =================
+    @Operation(
+        summary = "Obtener un torneo por ID",
+        description = "Devuelve la información completa de un torneo dado su ID.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Torneo encontrado",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{ \"id\": 1, \"nombre\": \"Copa Primavera\", \"tipoTorneo\": \"LIGA\", \"categoria\": \"UNIVERSITARIO\", \"fechaInicio\": \"2025-11-01\", \"fechaFin\": \"2025-11-30\" }"
+                    )
+                )
+            ),
+            @ApiResponse(responseCode = "404", description = "Torneo no encontrado")
+        }
+    )
     @GetMapping("/{id}")
     public Torneo obtenerTorneo(
             @Parameter(description = "ID del torneo que se desea consultar.", example = "1")
@@ -75,11 +97,23 @@ public class TorneoRestController {
     }
 
     // ✅ Buscar por nombre
-    @Operation(summary = "Buscar un torneo por nombre", description = "Permite buscar un torneo existente utilizando su nombre exacto.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Torneo encontrado."),
-        @ApiResponse(responseCode = "404", description = "No se encontró un torneo con ese nombre.")
-    })
+   // ================= BUSCAR TORNEO POR NOMBRE =================
+    @Operation(
+        summary = "Buscar un torneo por nombre",
+        description = "Permite buscar un torneo existente utilizando su nombre exacto.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Torneo encontrado",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{ \"id\": 1, \"nombre\": \"Copa Primavera\", \"tipoTorneo\": \"LIGA\", \"categoria\": \"UNIVERSITARIO\", \"fechaInicio\": \"2025-11-01\", \"fechaFin\": \"2025-11-30\" }"
+                    )
+                )
+            ),
+            @ApiResponse(responseCode = "404", description = "No se encontró un torneo con ese nombre")
+        }
+    )
     @GetMapping("/buscar")
     public Optional<Torneo> buscarPorNombre(
             @Parameter(description = "Nombre exacto del torneo a buscar.", example = "Copa Primavera")
@@ -87,9 +121,22 @@ public class TorneoRestController {
         return torneoService.obtenerPorNombre(nombre);
     }
 
-    // ✅ Crear nuevo torneo
-    @Operation(summary = "Crear un nuevo torneo", description = "Registra un nuevo torneo en el sistema con los datos proporcionados.")
-    @ApiResponse(responseCode = "201", description = "Torneo creado exitosamente.")
+    // ✅ Crear nuevo torneo// ================= CREAR TORNEO =================
+    @Operation(
+        summary = "Crear un nuevo torneo",
+        description = "Registra un nuevo torneo en el sistema con los datos proporcionados.",
+        responses = {
+            @ApiResponse(
+                responseCode = "201",
+                description = "Torneo creado exitosamente",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{ \"id\": 2, \"nombre\": \"Copa Otoño\", \"tipoTorneo\": \"LIGA\", \"categoria\": \"UNIVERSITARIO\", \"fechaInicio\": \"2025-12-01\", \"fechaFin\": \"2025-12-31\" }"
+                    )
+                )
+            )
+        }
+    )
     @PostMapping
     public Torneo crearTorneo(@Valid @RequestBody TorneoForm form) {
     // Convertimos el form a entidad
@@ -105,11 +152,23 @@ public class TorneoRestController {
 
 
     // ✅ Actualizar torneo
-    @Operation(summary = "Actualizar un torneo existente", description = "Modifica los datos de un torneo existente usando su ID.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Torneo actualizado correctamente."),
-        @ApiResponse(responseCode = "404", description = "No existe torneo con ese ID.")
-    })
+   // ================= ACTUALIZAR TORNEO =================
+    @Operation(
+        summary = "Actualizar un torneo existente",
+        description = "Modifica los datos de un torneo existente usando su ID.",
+        responses = {
+            @ApiResponse(
+                responseCode = "200",
+                description = "Torneo actualizado correctamente",
+                content = @Content(
+                    schema = @Schema(
+                        example = "{ \"id\": 1, \"nombre\": \"Copa Primavera Actualizada\", \"tipoTorneo\": \"LIGA\", \"categoria\": \"UNIVERSITARIO\", \"fechaInicio\": \"2025-11-01\", \"fechaFin\": \"2025-11-30\" }"
+                    )
+                )
+            ),
+            @ApiResponse(responseCode = "404", description = "No existe torneo con ese ID")
+        }
+    )
     @PutMapping("/{id}")
     public Torneo actualizarTorneo(@PathVariable int id, @Valid @RequestBody TorneoForm form) {
         Torneo torneo = torneoService.obtenerPorId(id);
@@ -128,11 +187,15 @@ public class TorneoRestController {
 
 
     // ✅ Eliminar torneo
-    @Operation(summary = "Eliminar un torneo", description = "Elimina un torneo existente del sistema usando su ID.")
-    @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Torneo eliminado exitosamente."),
-        @ApiResponse(responseCode = "404", description = "No se encontró el torneo especificado.")
-    })
+    // ================= ELIMINAR TORNEO =================
+    @Operation(
+        summary = "Eliminar un torneo",
+        description = "Elimina un torneo existente del sistema usando su ID.",
+        responses = {
+            @ApiResponse(responseCode = "204", description = "Torneo eliminado exitosamente"),
+            @ApiResponse(responseCode = "404", description = "No se encontró el torneo especificado")
+        }
+    )
     @DeleteMapping("/{id}")
     public void eliminarTorneo(
             @Parameter(description = "ID del torneo a eliminar.", example = "1")

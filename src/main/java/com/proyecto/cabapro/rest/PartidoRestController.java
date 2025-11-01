@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+
 @RestController
 @RequestMapping("/api/admin/torneos/{torneoId}/partidos")
 @Tag(name = "Partidos", description = "Operaciones sobre partidos de un torneo")
@@ -36,15 +37,52 @@ public class PartidoRestController {
         this.torneoService = torneoService;
     }
 
+    // ================= LISTAR PARTIDOS =================
+    @Operation(
+        summary = "Lista todos los partidos de un torneo",
+        description = "Devuelve la lista completa de partidos que pertenecen al torneo especificado por el path variable `torneoId`.",
+        responses = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "200",
+                description = "Lista de partidos",
+                content = @io.swagger.v3.oas.annotations.media.Content(
+                    schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        example = "[{ \"id\": 1, \"fecha\": \"2025-11-01T15:00:00\", \"cancha\": \"A\", \"arbitros\": [] }]"
+                    )
+                )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "404",
+                description = "Torneo no encontrado"
+            )
+        }
+    )
     @GetMapping
-    @Operation(summary = "Lista todos los partidos de un torneo")
     public ResponseEntity<List<Partido>> listarPartidos(@PathVariable int torneoId) {
         List<Partido> partidos = partidoService.getPartidosByTorneo(torneoId);
         return ResponseEntity.ok(partidos);
     }
 
+    // ================= OBTENER PARTIDO =================
+    @Operation(
+        summary = "Obtiene un partido por ID dentro de un torneo",
+        responses = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "200",
+                description = "Partido encontrado",
+                content = @io.swagger.v3.oas.annotations.media.Content(
+                    schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        example = "{ \"id\": 1, \"fecha\": \"2025-11-01T15:00:00\", \"cancha\": \"A\", \"arbitros\": [] }"
+                    )
+                )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "404",
+                description = "Partido o torneo no encontrado"
+            )
+        }
+    )
     @GetMapping("/{partidoId}")
-    @Operation(summary = "Obtiene un partido por ID dentro de un torneo")
     public ResponseEntity<Partido> obtenerPartido(@PathVariable int torneoId, @PathVariable int partidoId) {
         return partidoService.getPartidoById(partidoId)
                 .filter(p -> p.getTorneo().getIdTorneo() == torneoId)
@@ -52,8 +90,28 @@ public class PartidoRestController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+
+    // ================= CREAR PARTIDO =================
+    @Operation(
+        summary = "Crea un nuevo partido en un torneo",
+        description = "Se debe enviar un JSON con los datos del partido. El `torneoId` se toma del path variable.",
+        responses = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "201",
+                description = "Partido creado correctamente",
+                content = @io.swagger.v3.oas.annotations.media.Content(
+                    schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        example = "{ \"id\": 5, \"fecha\": \"2025-11-10T18:00:00\", \"cancha\": \"B\", \"arbitros\": [] }"
+                    )
+                )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "404",
+                description = "Torneo no encontrado"
+            )
+        }
+    )
     @PostMapping
-    @Operation(summary = "Crea un nuevo partido en un torneo")
     public ResponseEntity<Partido> crearPartido(@PathVariable int torneoId,
                                                 @Valid @RequestBody PartidoForm form) {
         // Verificar que el torneo exista
@@ -67,8 +125,27 @@ public class PartidoRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(partido);
     }
 
+
+    // ================= ACTUALIZAR PARTIDO =================
+    @Operation(
+        summary = "Actualiza un partido existente de un torneo",
+        responses = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "200",
+                description = "Partido actualizado correctamente",
+                content = @io.swagger.v3.oas.annotations.media.Content(
+                    schema = @io.swagger.v3.oas.annotations.media.Schema(
+                        example = "{ \"id\": 1, \"fecha\": \"2025-11-01T17:00:00\", \"cancha\": \"A\", \"arbitros\": [] }"
+                    )
+                )
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "404",
+                description = "Partido o torneo no encontrado"
+            )
+        }
+    )
     @PutMapping("/{partidoId}")
-    @Operation(summary = "Actualiza un partido existente de un torneo")
     public ResponseEntity<Partido> actualizarPartido(@PathVariable int torneoId,
                                                      @PathVariable int partidoId,
                                                      @Valid @RequestBody PartidoForm form) {
@@ -81,9 +158,21 @@ public class PartidoRestController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
-
+    // ================= ELIMINAR PARTIDO =================
+    @Operation(
+        summary = "Elimina un partido de un torneo",
+        responses = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "204",
+                description = "Partido eliminado correctamente"
+            ),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                responseCode = "404",
+                description = "Partido o torneo no encontrado"
+            )
+        }
+    )
     @DeleteMapping("/{partidoId}")
-    @Operation(summary = "Elimina un partido de un torneo")
     public ResponseEntity<Void> eliminarPartido(@PathVariable int torneoId,
                                                 @PathVariable int partidoId) {
         return partidoService.getPartidoById(partidoId)
