@@ -54,11 +54,15 @@ public class PartidoRestController {
 
     @PostMapping
     @Operation(summary = "Crea un nuevo partido en un torneo")
-    public ResponseEntity<Partido> crearPartido(@PathVariable int torneoId, 
+    public ResponseEntity<Partido> crearPartido(@PathVariable int torneoId,
                                                 @Valid @RequestBody PartidoForm form) {
+        // Verificar que el torneo exista
         Torneo torneo = torneoService.obtenerPorId(torneoId);
-        if (torneo == null) return ResponseEntity.notFound().build();
+        if (torneo == null) {
+            return ResponseEntity.notFound().build();
+        }
 
+        // Crear el partido asignando el torneo del path
         Partido partido = partidoService.crearPartido(form, torneo);
         return ResponseEntity.status(HttpStatus.CREATED).body(partido);
     }
@@ -68,9 +72,13 @@ public class PartidoRestController {
     public ResponseEntity<Partido> actualizarPartido(@PathVariable int torneoId,
                                                      @PathVariable int partidoId,
                                                      @Valid @RequestBody PartidoForm form) {
+        // Validar que el partido exista y pertenezca al torneo correcto
         return partidoService.getPartidoById(partidoId)
                 .filter(p -> p.getTorneo().getIdTorneo() == torneoId)
-                .map(p -> ResponseEntity.ok(partidoService.actualizarPartido(p, form)))
+                .map(p -> {
+                    Partido actualizado = partidoService.actualizarPartido(p, form);
+                    return ResponseEntity.ok(actualizado);
+                })
                 .orElse(ResponseEntity.notFound().build());
     }
 

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.proyecto.cabapro.controller.forms.TorneoForm;
 import com.proyecto.cabapro.model.Torneo;
 import com.proyecto.cabapro.service.TorneoService;
 
@@ -25,6 +26,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/admin/torneos")
@@ -89,15 +91,18 @@ public class TorneoRestController {
     @Operation(summary = "Crear un nuevo torneo", description = "Registra un nuevo torneo en el sistema con los datos proporcionados.")
     @ApiResponse(responseCode = "201", description = "Torneo creado exitosamente.")
     @PostMapping
-    public Torneo crearTorneo(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                description = "Datos del torneo a crear.",
-                required = true,
-                content = @Content(schema = @Schema(implementation = Torneo.class))
-            )
-            @RequestBody Torneo torneo) {
-        return torneoService.guardarTorneo(torneo);
-    }
+    public Torneo crearTorneo(@Valid @RequestBody TorneoForm form) {
+    // Convertimos el form a entidad
+    Torneo torneo = new Torneo();
+    torneo.setNombre(form.getNombre());
+    torneo.setTipoTorneo(form.getTipoTorneo());
+    torneo.setCategoria(form.getCategoria());
+    torneo.setFechaInicio(form.getFechaInicio());
+    torneo.setFechaFin(form.getFechaFin());
+
+    return torneoService.guardarTorneo(torneo);
+}
+
 
     // ✅ Actualizar torneo
     @Operation(summary = "Actualizar un torneo existente", description = "Modifica los datos de un torneo existente usando su ID.")
@@ -106,24 +111,21 @@ public class TorneoRestController {
         @ApiResponse(responseCode = "404", description = "No existe torneo con ese ID.")
     })
     @PutMapping("/{id}")
-    public Torneo actualizarTorneo(
-            @Parameter(description = "ID del torneo a actualizar.", example = "1")
-            @PathVariable int id,
-            @RequestBody Torneo torneoActualizado) {
-
+    public Torneo actualizarTorneo(@PathVariable int id, @Valid @RequestBody TorneoForm form) {
         Torneo torneo = torneoService.obtenerPorId(id);
         if (torneo == null) {
             throw new RuntimeException("No existe torneo con id " + id);
         }
 
-        torneo.setNombre(torneoActualizado.getNombre());
-        torneo.setTipoTorneo(torneoActualizado.getTipoTorneo());
-        torneo.setCategoria(torneoActualizado.getCategoria());
-        torneo.setFechaInicio(torneoActualizado.getFechaInicio());
-        torneo.setFechaFin(torneoActualizado.getFechaFin());
+        torneo.setNombre(form.getNombre());
+        torneo.setTipoTorneo(form.getTipoTorneo());
+        torneo.setCategoria(form.getCategoria());
+        torneo.setFechaInicio(form.getFechaInicio());
+        torneo.setFechaFin(form.getFechaFin());
 
         return torneoService.guardarTorneo(torneo);
     }
+
 
     // ✅ Eliminar torneo
     @Operation(summary = "Eliminar un torneo", description = "Elimina un torneo existente del sistema usando su ID.")

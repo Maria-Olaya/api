@@ -29,7 +29,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
           .allowedOriginPatterns("*")  // cualquier origen
           .allowedMethods("*")         // cualquier método
           .allowedHeaders("*")
-          .allowCredentials(true)
+          .allowCredentials(false)
           .maxAge(3600);
 
   }

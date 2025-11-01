@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.proyecto.cabapro.enums.EstadoPartido;
@@ -48,7 +48,7 @@ public class Partido {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="torneo_id")
-    @JsonBackReference // 🔹 Rompe ciclo con Torneo
+    @JsonIgnore  // 🔹 Rompe ciclo con Torneo
     private Torneo torneo;
 
     @ManyToMany(fetch = FetchType.LAZY)
