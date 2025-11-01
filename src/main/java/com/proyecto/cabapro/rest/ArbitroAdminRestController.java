@@ -13,10 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.proyecto.cabapro.controller.forms.ArbitroForm;
 import com.proyecto.cabapro.model.Arbitro;
 import com.proyecto.cabapro.model.Asignacion;
 import com.proyecto.cabapro.service.ArbitroService;
 import com.proyecto.cabapro.service.AsignacionService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/admin/arbitros") //bien
@@ -44,16 +47,33 @@ public class ArbitroAdminRestController {
     }
 
     // ================= CREAR =================
-    @PostMapping
-    public Arbitro crearArbitro(@RequestBody Arbitro arbitro) {
+    @PostMapping(consumes = "application/json", produces = "application/json")
+    public Arbitro crearArbitro(@Valid @RequestBody ArbitroForm form) {
+        Arbitro arbitro = new Arbitro();
+        arbitro.setNombre(form.getNombre());
+        arbitro.setApellido(form.getApellido());
+        arbitro.setCorreo(form.getCorreo());
+        arbitro.setContrasena(form.getContrasena());
+        arbitro.setEspecialidad(form.getEspecialidad());
+        arbitro.setEscalafon(form.getEscalafon());
         return service.crear(arbitro);
     }
 
+
     // ================= ACTUALIZAR =================
-    @PutMapping("/{id}")
-    public Arbitro actualizarArbitro(@PathVariable Integer id, @RequestBody Arbitro arbitro) {
+    @PutMapping(value = "/{id}", consumes = "application/json", produces = "application/json")
+    public Arbitro actualizarArbitro(@PathVariable Integer id, 
+                                    @Valid @RequestBody ArbitroForm form) {
+        Arbitro arbitro = new Arbitro();
+        arbitro.setNombre(form.getNombre());
+        arbitro.setApellido(form.getApellido());
+        arbitro.setCorreo(form.getCorreo());
+        arbitro.setContrasena(form.getContrasena());
+        arbitro.setEspecialidad(form.getEspecialidad());
+        arbitro.setEscalafon(form.getEscalafon());
         return service.actualizar(id, arbitro);
     }
+
 
     // ================= ELIMINAR =================
     @DeleteMapping("/{id}")
