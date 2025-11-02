@@ -1,7 +1,8 @@
 
-// MODIFICADO 
+// MODIFICADO  -si -si  _ MODIFICADO
 package com.proyecto.cabapro.service;
 
+import java.util.Optional;  
 import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
@@ -37,7 +38,7 @@ public class LiquidacionService {
     private final ArbitroRepository arbitroRepo;
     private final PartidoRepository partidoRepo;
     private final TarifaRepository tarifaRepo;
-    private final LiquidacionRepository liquidacionRepo;
+    private final LiquidacionRepository liquidacionRepo; // ✅ este es el nombre correcto
     private final PagoRepository pagoRepo;
     private final TarifaService tarifaService;
 
@@ -99,7 +100,6 @@ public class LiquidacionService {
                 .map(Tarifa::getMonto)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // 🟢 CAMBIO: el PDF ahora detecta el idioma real, o usa fallback si aún no se estableció
         byte[] pdf = generarPdf(a, pendientes, total);
 
         Liquidacion liq = new Liquidacion();
@@ -150,6 +150,20 @@ public class LiquidacionService {
         return l.getPdf();
     }
 
+    // ==================== 🟢 NUEVO MÉTODO: Buscar por ID =====================
+    /**
+     * Este método se usa en LiquidacionArbitroRestController
+     * para validar que la liquidación pertenece al árbitro autenticado.
+     */
+    public Liquidacion buscarPorId(Long id) {
+        // 🔹 ANTES usabas "liquidacionRepository" (que no existe)
+        // 🔹 AHORA usamos correctamente "liquidacionRepo"
+        Optional<Liquidacion> liquidacion = liquidacionRepo.findById(id);
+        return liquidacion.orElse(null);
+    }
+    // ======================================================================
+
+
     // ==================== Helpers =====================
     private void autoGenerarTarifasSiFaltan(Arbitro a) {
         List<Partido> partidos = partidoRepo.findByArbitros_Id(a.getId());
@@ -189,14 +203,8 @@ public class LiquidacionService {
 
     // ==================== PDF =====================
     private byte[] generarPdf(Arbitro a, List<Tarifa> filas, BigDecimal total) {
-        // 🟢 CAMBIO: Aseguramos que el locale no sea nulo
         Locale locale = LocaleContextHolder.getLocale();
-        if (locale == null) {
-            locale = Locale.getDefault(); // 🟢 Fallback al idioma del sistema/navegador
-        }
-
-        // 🟢 CAMBIO (opcional): Log para verificar idioma detectado
-        System.out.println("🗣 Generando PDF en idioma: " + locale);
+        if (locale == null) locale = Locale.getDefault();
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             Document doc = new Document(PageSize.A4);
@@ -206,7 +214,6 @@ public class LiquidacionService {
             Font h1 = new Font(Font.HELVETICA, 16, Font.BOLD);
             Font normal = new Font(Font.HELVETICA, 10);
 
-            // Encabezado traducido
             doc.add(new Paragraph(messageSource.getMessage("pdf.title", null, locale), h1));
             doc.add(new Paragraph(messageSource.getMessage("pdf.referee", null, locale) + ": "
                     + a.getNombre() + " " + a.getApellido(), normal));
@@ -224,7 +231,6 @@ public class LiquidacionService {
             table.addCell(messageSource.getMessage("pdf.table.venue", null, locale));
             table.addCell(messageSource.getMessage("pdf.table.amount", null, locale));
 
-            // Filas dinámicas (no traducidas, vienen del contenido real)
             filas.forEach(t -> {
                 table.addCell(t.getPartido().getFecha().toString());
                 table.addCell(t.getTorneo().getNombre());

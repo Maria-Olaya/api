@@ -1,4 +1,4 @@
-// NUEVO - si 
+// NUEVO - si - si MODFICADO
 package com.proyecto.cabapro.rest;
 
 import java.net.URLEncoder;
@@ -133,28 +133,43 @@ public class LiquidacionArbitroRestController {
             )
         }
     )
-    @GetMapping("/{liqId}/pdf")
-    public ResponseEntity<Resource> obtenerPdf(@PathVariable Long liqId) {
-        try {
-            byte[] pdf = liquidacionService.obtenerPdf(liqId);
+@GetMapping("/{liqId}/pdf")
+public ResponseEntity<Resource> obtenerPdf(@PathVariable Long liqId, @AuthenticationPrincipal User principal) {
+    try {
+        // 1️⃣ Obtener el árbitro autenticado
+        Arbitro arbitro = arbitroService.getActual(principal.getUsername());
 
-            if (pdf == null || pdf.length == 0) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(null);
-            }
-
-            String filename = URLEncoder.encode("mi-liquidacion-" + liqId + ".pdf", StandardCharsets.UTF_8);
-            ByteArrayResource resource = new ByteArrayResource(pdf);
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.APPLICATION_PDF)
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + filename)
-                    .contentLength(pdf.length)
-                    .body(resource);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
+        // 2️⃣ Verificar que la liquidación pertenezca a ese árbitro
+        var liquidacion = liquidacionService.buscarPorId(liqId);
+        if (liquidacion == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+
+        if (liquidacion.getArbitro() == null || liquidacion.getArbitro().getId() != arbitro.getId()) {
+              return ResponseEntity.status(HttpStatus.FORBIDDEN)
+            .body(new ByteArrayResource("No tienes permiso para ver esta liquidación.".getBytes()));
+       }
+
+        // 3️⃣ Generar el PDF si la liquidación sí pertenece al árbitro
+        byte[] pdf = liquidacionService.obtenerPdf(liqId);
+
+        if (pdf == null || pdf.length == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        String filename = URLEncoder.encode("mi-liquidacion-" + liqId + ".pdf", StandardCharsets.UTF_8);
+        ByteArrayResource resource = new ByteArrayResource(pdf);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=" + filename)
+                .contentLength(pdf.length)
+                .body(resource);
+
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ByteArrayResource(("Error: " + e.getMessage()).getBytes()));
     }
+}
+
 }
