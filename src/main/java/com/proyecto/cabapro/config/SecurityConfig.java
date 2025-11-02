@@ -1,3 +1,4 @@
+
 package com.proyecto.cabapro.config;
 
 import java.util.List;
@@ -38,54 +39,48 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .cors(cors -> cors.configurationSource(request -> {
-                var config = new org.springframework.web.cors.CorsConfiguration();
-                config.setAllowedOriginPatterns(List.of("*")); // permite cualquier origen
-                config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                config.setAllowedHeaders(List.of("*"));
-                config.setAllowCredentials(true); // ⚠️ importante para cookies / auth
-                config.setMaxAge(3600L);
-                return config;
+                var c = new org.springframework.web.cors.CorsConfiguration();
+                c.setAllowedOriginPatterns(List.of("*"));
+                c.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
+                c.setAllowedHeaders(List.of("*"));
+                c.setAllowCredentials(true);
+                c.setMaxAge(3600L);
+                return c;
             }))
-
             .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Swagger totalmente público
+                // Swagger público
                 .requestMatchers(
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/api-docs/**",   // 👈 Cambiado aquí
-                    "/api-docs/swagger-config", // 👈 Cambiado aquí
-                    "/swagger-resources/**",
-                    "/webjars/**",
-                    "/", "/error", "/favicon.ico"
+                    "/swagger-ui/**","/swagger-ui.html",
+                    "/api-docs/**","/api-docs/swagger-config",
+                    "/swagger-resources/**","/webjars/**",
+                    "/","/error","/favicon.ico"
                 ).permitAll()
 
-                // Endpoints públicos de autenticación
-                .requestMatchers("/api/auth/**","/api/news").permitAll()
+                // Auth público
+                .requestMatchers("/api/auth/**").permitAll()
 
-                // Rutas protegidas
+                // ✅ News requieren rol API (que otorga el ApiKeyAuthFilter)
+                .requestMatchers("/api/news/**").hasRole("API")
+
+                // Resto con JWT
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/arbitro/**").hasRole("ARBITRO")
                 .requestMatchers("/api/**").authenticated()
 
-                // Cualquier otro request (no listado) se bloquea
                 .anyRequest().denyAll()
             )
 
-
-            // 🔹 Orden importante: primero la API Key, luego el JWT
+            // Orden: primero API KEY, luego JWT
             .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            // Filtro JWT
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            // Manejo de errores en JSON
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint((req, res, excep) -> {
-                    res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                    res.setContentType("application/json");
-                    res.getWriter().write("{\"error\": \"Unauthorized or invalid credentials\"}");
-                })
-            );
+
+            .exceptionHandling(ex -> ex.authenticationEntryPoint((req, res, e) -> {
+                res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                res.setContentType("application/json");
+                res.getWriter().write("{\"error\":\"Unauthorized or invalid credentials\"}");
+            }));
 
         return http.build();
     }
